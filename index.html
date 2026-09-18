@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <title>Lumpo | Free heart rate monitor</title>
+  <!-- Description for search engines and browser favicons -->
+  <meta name="description" content="Free browser-based heart rate monitor no install required.">
+  
+  <!-- iOS PWA Enhancements -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Link to the web app manifest file, used for PWA installation -->
+  <link rel="manifest" href="manifest.json">
+  <!-- Favicon and Apple Touch Icon for PWA installation -->
+  <link rel="icon" type="image/png" href="lumpo192.png">
+  <link rel="apple-touch-icon" href="lumpo192.png">
+  <meta name="apple-mobile-web-app-title" content="Lumpo">
+  <!-- Sets the theme color for browser UI (e.g., address bar) -->
+  <meta name="theme-color" content="#020617">
+  
+  <!-- Main stylesheet containing all styling rules -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="dark-mode">
+  <div class="wrap">
+    <!-- HEADER: Displays the app title and the primary connection button -->
+    <header>
+      <div class="app-info">
+        <h1>HR & Workout timer</h1>
+        <div class="subtitle">Connect a Bluetooth heart-rate monitor</div>
+      </div>
+      <!-- Placeholder to push the button to the right side -->
+      <div style="margin-left:auto;"></div> 
+        <button id="themeToggle" class="ghost" style="margin-right: 8px; min-width: 48px; padding: 0;">🌙</button>
+        <button id="connectBtn" class="primary">Connect</button>
+    </header>
+
+    <!-- GRID: Main layout container, columns adjust based on screen size (mobile vs desktop) -->
+    <div class="grid">
+      
+      <!-- LEFT CARD: Status and core metrics (BPM, MaxHR, Elapsed Time) -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+          <div>
+            <div class="label">Status</div>
+            <div id="status" class="muted">Disconnected</div>
+          </div>
+          <div class="stat-item" style="align-items: flex-end;">
+            <div id="calories" style="font-size:22px; color:var(--text); font-weight:800; line-height:1;">—</div>
+            <div class="label">Calories</div>
+          </div>
+        </div>
+
+        <div class="label">Heart Rate</div>
+        
+        <!-- CONTAINER: Holds the primary BPM display and other metrics -->
+        <div class="stat-group">
+          
+          <!-- Primary BPM Reading -->
+          <div id="bpm" class="big">—</div>
+
+          <!-- CONTAINER: Holds supporting metrics (MaxHR, AvgHR) -->
+          <div class="stat-group">
+            <!-- Column 1: Session Totals -->
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div class="stat-item">
+                    <div id="maxBpm" style="font-size:22px; color:#dc2626; font-weight:800; line-height:1;">—</div>
+                    <div class="label">MaxHR</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div id="totalAvgBpm" style="font-size:22px; color:#dc2626; font-weight:800; line-height:1;">—</div>
+                    <div class="label">TotAvg</div>
+                </div>
+
+                <div class="stat-item">
+                    <div id="stdDevBpm" style="font-size:22px; color:var(--muted); font-weight:800; line-height:1;">—</div>
+                    <div class="label">StdDev</div>
+                </div>
+            </div>
+            
+            <!-- Column 2: Live Trends -->
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div class="stat-item">
+                    <div id="rollAvgBpm" style="font-size:22px; color:#dc2626; font-weight:800; line-height:1;">—</div>
+                    <div class="label">RollAvg</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div id="drift" style="font-size:22px; color:var(--muted); font-weight:800; line-height:1;">—</div>
+                    <div class="label">Drift%</div>
+                </div>
+            </div>
+
+            <!-- Column 3: Quartile Averages -->
+            <div class="quartile-grid">
+                <div class="stat-item">
+                    <div id="q1Avg" style="font-size:22px; color:var(--muted); font-weight:700;">—</div>
+                    <div class="label" style="font-size:10px;">Q1</div>
+                </div>
+                <div class="stat-item">
+                    <div id="q2Avg" style="font-size:22px; color:var(--muted); font-weight:700;">—</div>
+                    <div class="label" style="font-size:10px;">Q2</div>
+                </div>
+                <div class="stat-item">
+                    <div id="q3Avg" style="font-size:22px; color:var(--muted); font-weight:700;">—</div>
+                    <div class="label" style="font-size:10px;">Q3</div>
+                </div>
+                <div class="stat-item">
+                    <div id="q4Avg" style="font-size:22px; color:var(--muted); font-weight:700;">—</div>
+                    <div class="label" style="font-size:10px;">Q4</div>
+                </div>
+                <div style="grid-column: span 2; padding-top:4px; border-top:1px solid var(--border);">
+                    <span id="qDrift" style="font-weight:800; color:var(--text);">—</span> <span class="label" style="font-size:10px;">Q-DRIFT %</span>
+                </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- CONTAINER: Holds secondary metrics (Battery, Elapsed Time) -->
+        <div class="stat-row">
+          <div class="metric-pair">
+            <div class="label">Battery</div>
+            <div id="battery">—</div>
+          </div>
+            <div class="metric-pair">
+              <div class="label">Elapsed Time</div>
+              <div id="elapsed" class="muted elapsed-display">00:00:00</div>
+            </div>
+        </div>
+      </div>
+
+      <!-- RIGHT CARD AREA: Controls and Logs -->
+      <div class="card">
+  <!-- TIMER CONTROLS CARD -->
+  <div class="controls">
+    <button id="startTimer" class="success">Start</button>
+    <button id="pauseTimer" class="danger">Stop</button>
+    <button id="resetTimer" class="primary" disabled>Reset</button>
+  </div>
+
+  <!-- HEART RATE ZONE CALCULATION PANEL -->
+  <div class="zone-panel maf-mode">
+    <div class="zone-panel-header">
+      <div class="zone-mode-summary">
+        <button id="zoneModeToggleBtn" class="ghost" style="font-size: 11px; padding: 4px 8px; min-height: 32px; font-weight: 700; text-transform: uppercase;">MAF-Based Zones</button>
+        <div id="zoneMaxDisplay" class="zone-max-display">MAF Number 145</div>
+      </div>
+      <div class="zone-age-selector">
+        <div class="selector-item">
+          <button id="ageSelectBtn" class="ghost dropdown-toggle" aria-expanded="false">Age 35 ▾</button>
+          <div id="ageSelectMenu" class="age-select-menu hidden" role="menu" aria-label="Select age"></div>
+        </div>
+        <button id="genderToggleBtn" class="ghost">M</button>
+        <button id="unitToggleBtn" class="ghost">kg</button>
+        <div class="weight-selector">
+          <button id="weightSelectBtn" class="ghost dropdown-toggle" aria-expanded="false">
+            <span id="weightDisplay">70</span> ▾
+          </button>
+          <div id="weightSelectMenu" class="weight-select-menu hidden" role="menu" aria-label="Select weight"></div>
+        </div>
+      </div>
+    </div>
+    <div class="zone-chart-wrap">
+      <div class="zone-chart">
+        <div class="zone-chart-track">
+          <div class="zone-segment zone-segment-1"></div>
+          <div class="zone-segment zone-segment-2"></div>
+          <div class="zone-segment zone-segment-3"></div>
+          <div class="zone-segment zone-segment-4"></div>
+          <div class="zone-segment zone-segment-5"></div>
+        </div>
+        <div id="zoneIndicator" class="zone-indicator" aria-hidden="true">
+          <div id="zoneIndicatorTip" class="zone-indicator-tip top">▼</div>
+        </div>
+      </div>
+      <div class="zone-chart-values">
+        <div id="zone1" class="zone-value zone-value-1">
+          <span class="zone-value-percent">—</span>
+          <span class="zone-value-bpm"></span>
+        </div>
+        <div id="zone2" class="zone-value zone-value-2">
+          <span class="zone-value-percent">—</span>
+          <span class="zone-value-bpm"></span>
+        </div>
+        <div id="zone3" class="zone-value zone-value-3">
+          <span class="zone-value-percent">—</span>
+          <span class="zone-value-bpm"></span>
+        </div>
+        <div id="zone4" class="zone-value zone-value-4">
+          <span class="zone-value-percent">—</span>
+          <span class="zone-value-bpm"></span>
+        </div>
+        <div id="zone5" class="zone-value zone-value-5">
+          <span class="zone-value-percent">—</span>
+          <span class="zone-value-bpm"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="audio-prompt-control" aria-label="Audio zone prompts">
+    <div class="audio-prompt-header">
+      <div>
+        <div class="label">Audio prompts</div>
+        <div class="audio-prompt-caption">Quietly announce zone and HR</div>
+      </div>
+      <label class="audio-toggle">
+        <input id="audioPromptToggle" type="checkbox" aria-label="Enable audio prompts">
+        <span class="audio-toggle-track" aria-hidden="true"></span>
+      </label>
+    </div>
+    <div id="audioPromptOptions" class="audio-prompt-options hidden">
+      <label for="audioPromptInterval">Repeat</label>
+      <input id="audioPromptInterval" type="range" min="0" max="6" step="1" value="0" list="audioPromptIntervals">
+      <datalist id="audioPromptIntervals">
+        <option value="0" label="Changes only"></option>
+        <option value="1" label="30 sec"></option>
+        <option value="2" label="1 min"></option>
+        <option value="3" label="2 min"></option>
+        <option value="4" label="3 min"></option>
+        <option value="5" label="4 min"></option>
+        <option value="6" label="5 min"></option>
+      </datalist>
+      <output id="audioPromptIntervalValue" for="audioPromptInterval">Changes only</output>
+    </div>
+  </div>
+
+  <!-- ACTIVITY LOG SECTION -->
+  <div class="control-bar">
+    <div class="label">Activity Log</div>
+    <div class="log-toggle"><button id="toggleLog" class="ghost">Show Log</button></div>
+  </div>
+  <!-- The scrolling log area -->
+  <div id="log" class="activity-log-section hidden"></div>
+      </div> <!-- End Right Card -->
+    </div> <!-- End Grid -->
+</div>
+
+<!-- 
+    SCRIPT: Client-side JavaScript logic. 
+    This script handles Bluetooth connections, timer functionality, and UI updates. 
+-->
+<script type="module" src="app.js"></script>
+
+
+</body>
+</html>
